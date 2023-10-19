@@ -23,9 +23,33 @@ dataset2 <- dataset2 %>% mutate(Week = week(Date))
 grouped_data <- dataset2 %>% group_by(Week)
 
 #calculating the moving average
-library(forecast)
+# library(forecast)
+library(zoo)
+dataset2 <- subset(dataset2, dataset2$Week != 53, select = c("Date", "Time" , "Global_intensity", "Week"))
+movingAveList <- list()
 
-timeSeries <- ts(dataset2$, start=c(2007, 1), end = c(2007, 2))
+for(i in 1:52) {
+  week_subset <- subset(dataset2, dataset2$Week == i)
+  timeSeries <- ts(week_subset)
+  
+  week_movingAve <- rollmean(timeSeries, k=10, align='right')
+  
+  movingAveList[[i]] <- week_movingAve
+}
 
-# MA_m7 = forecast::ma(NDVI)
+# Create a new data frame to store only the Global_intensity columns from movingAveList
+global_intensity_data <- data.frame(matrix(nrow = 10071, ncol = 52))  # Initialize an empty data frame
+
+# Populate the data frame with Global_intensity values
+for (j in 1:52) {
+  global_intensity_data[, j] <- movingAveList[[j]][, 3]
+}
+
+global_intensity_data$Row_Averages <- rowMeans(global_intensity_data, na.rm = TRUE)
+
+
+
+
+
+
 
