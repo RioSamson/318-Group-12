@@ -48,8 +48,42 @@ for (j in 1:52) {
 global_intensity_data$Row_Averages <- rowMeans(global_intensity_data, na.rm = TRUE)
 
 
+results_df <- data.frame(Week = 1:52, Difference = numeric(52))
+
+for (week in 1:52) {
+  a <- 0
+  for (i in 1:10071) {
+    if (!is.na(global_intensity_data[i, week]) && !is.na(global_intensity_data[i, 53])) {
+      a <- a + (global_intensity_data[i, week] - global_intensity_data[i, 53])
+    }
+  }
+  results_df$Difference[week] <- abs(a)
+}
+
+print(min(results_df$Difference))
+print(max(results_df$Difference))
+
+results_df<- results_df[order(results_df$Difference), ]
+results_df
+
+results_df[1,1]
+results_df[52,1]
+
+#-------------
+library(ggplot2)
+
+y_val <- as.numeric(global_intensity_data$X43)
 
 
+plot(1:10071, y_val, main = "Most, Least, and average anomalous weeks", type = 'l', 
+     ylab = "Moving average of the week", xlab = "Minute increments of the week")
 
+lines(1:10071, as.numeric(global_intensity_data$X34), type = 'l', 
+      col = 'red')
+
+lines(1:10071, as.numeric(global_intensity_data$Row_Averages), type = 'l',
+      col = 'green')
+
+legend(x="topleft" , legend = c("Least anamolous - week 43", "Most anamolous - week 34", "Average smoothened week"), lty = c(1,1, 1), col = c(1,2, 3), cex = 0.7)
 
 
