@@ -26,6 +26,18 @@ dataset<-dataset %>%
 time_window<-subset(dataset,dataset$Date$wday == 1)
 time_window<-subset(time_window,time_window$Time>="13:00:00" & time_window$Time<"15:00:00")
 
+#adding the info of which week number the data is from
+time_window <- time_window %>% mutate(Week = week(Date))
+
+#removing the 53rd week because its just one day and not a whole week- dec 31
+#now there is only 52 weeks
+time_window <- subset(time_window, time_window$Week != 53)
+
 #For global_active_power:
 time_window$Global_active_power<-scale(time_window$Global_active_power)
-time_window <- select(time_window, -c(Global_reactive_power, Voltage,Global_intensity,Sub_metering_1,Sub_metering_2,Sub_metering_3))
+time_window <- select(time_window, -c(Global_reactive_power, Voltage,Global_intensity,Sub_metering_1,Sub_metering_2,Sub_metering_3, weekday))
+
+
+
+
+
