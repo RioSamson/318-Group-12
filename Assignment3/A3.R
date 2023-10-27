@@ -8,8 +8,9 @@ library(ggplot2)
 # setwd("C:/Users/User/Downloads")
 
 # upload the data set and then make the time into POSIX local time objects
-dataset <- read.csv("Group_Assignment_1_Dataset.txt", header = TRUE) %>%
-  na.omit()
+dataset <- read.csv("Group_Assignment_1_Dataset.txt", header = TRUE) 
+# %>%
+#   na.omit()
 dataset$Time <- as.POSIXlt(dataset$Time, format="%H:%M:%S")
 dataset$Date <- as.POSIXlt(dataset$Date, format = "%d/%m/%Y")
 dataset$Time <-format(dataset$Time, "%H:%M:%S")
@@ -37,7 +38,23 @@ time_window <- subset(time_window, time_window$Week != 53)
 time_window$Global_active_power<-scale(time_window$Global_active_power)
 time_window <- select(time_window, -c(Global_reactive_power, Voltage,Global_intensity,Sub_metering_1,Sub_metering_2,Sub_metering_3, weekday))
 
+library(depmixS4)
 
+# ntimes:The vector of independent time series lengths.
 
+#we are only going to use 37 weeks to train. This will be 70% for training + 30 for testing.
+
+model <- depmix(response = Global_active_power ~1, data =time_window, nstates =3, ntimes = c(120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
+                                                                                             120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
+                                                                                             120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
+                                                                                             120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
+                                                                                             120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
+                                                                                             120, 120))
+
+model <- depmix(response = Global_active_power ~1, data =time_window, nstates =3, ntimes = nrow(time_window))
+fitModel <- fit(model)
+summary(fitModel)
+
+BIC(model)
 
 
