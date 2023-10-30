@@ -4,7 +4,7 @@ library(tidyr)
 library(ggplot2)
 
 #this is just for my computer. different for yours! CHANGE, DELETE!
-# setwd("C:/Users/User/Downloads")
+# setwd("C:/Users/User/ Downloads")
 
 # upload the data set and then make the time into POSIX local time objects
 dataset <- read.csv("Group_Assignment_1_Dataset.txt", header = TRUE) 
@@ -39,6 +39,36 @@ time_window <- select(time_window, -c(Global_reactive_power, Voltage,Global_inte
 
 library(depmixS4)
 
+
+
+
+#------------------------------------------
+BIC_Values <- list()
+Log_Likelihood_values <- list()
+
+BIC_Values[1] <- 0 
+BIC_Values[2] <- 0
+for(i in 3:16){
+  model <- depmix(response = Global_active_power ~1, data =time_window, 
+                  nstates =i, ntimes = c(120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
+                                         120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
+                                         120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
+                                         120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
+                                         120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
+                                         120, 120))
+  
+  fm <- fit(model)
+  BIC_Values[i] <- BIC(fm) 
+  
+}
+Nstate_BIC <- unlist(BIC_Values)
+plot( 3:16, Nstate_BIC, type = 'l', 
+      xlab = "Number of States", ylab = "BIC Value",
+      main = "BIC Value vs. Number of States")
+
+
+#------------------------------------------
+
 # ntimes:The vector of independent time series lengths.
 
 #we are only going to use 37 weeks to train. This will be 70% for training + 30 for testing.
@@ -50,10 +80,19 @@ model <- depmix(response = Global_active_power ~1, data =time_window, nstates =3
                                                                                              120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
                                                                                              120, 120))
 
-model <- depmix(response = Global_active_power ~1, data =time_window, nstates =3, ntimes = nrow(time_window))
+# model <- depmix(response = Global_active_power ~1, data =time_window, nstates =3, ntimes = nrow(time_window))
 fitModel <- fit(model)
 summary(fitModel)
 
-BIC(model)
+BIC(fitModel)
+
+
+plot(BIC(fitModel),ty="b")
+
+fitModel
+logLik(fitModel)
+BIC(fitModel)
+
+#-----------------------------------------------------------
 
 
