@@ -1,11 +1,10 @@
 library(lubridate)
 library(dplyr)
-library(lubridate)
 library(tidyr)
 library(ggplot2)
 
 #this is just for my computer. different for yours! CHANGE, DELETE!
-# setwd("C:/Users/User/Downloads")
+# setwd("C:/Users/User/ Downloads")
 
 # upload the data set and then make the time into POSIX local time objects
 dataset <- read.csv("Group_Assignment_1_Dataset.txt", header = TRUE) 
@@ -42,19 +41,41 @@ library(depmixS4)
 
 # ntimes:The vector of independent time series lengths.
 
-#we are only going to use 37 weeks to train. This will be 70% for training + 30 for testing.
+#we are only going to use 37 weeks to train. This will be 70% for training + 30 for testing. - this is only for the term project
 
-model <- depmix(response = Global_active_power ~1, data =time_window, nstates =3, ntimes = c(120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
-                                                                                             120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
-                                                                                             120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
-                                                                                             120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
-                                                                                             120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
-                                                                                             120, 120))
+BIC_Values <- list()
+Log_Likelihood_values <- list()
 
-model <- depmix(response = Global_active_power ~1, data =time_window, nstates =3, ntimes = nrow(time_window))
-fitModel <- fit(model)
-summary(fitModel)
+# BIC_Values[1] <- 0 
+# BIC_Values[2] <- 0
+# Log_Likelihood_values[1] <-0
+# Log_Likelihood_values[2] <-0
+for(i in 3:16){
+  model <- depmix(response = Global_active_power ~1, data =time_window, 
+                  nstates =i, ntimes = c(120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
+                                         120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
+                                         120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
+                                         120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
+                                         120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
+                                         120, 120))
+  
+  fm <- fit(model)
+  BIC_Values[i] <- BIC(fm) 
+  Log_Likelihood_values[i] <- logLik(fm)
+}
+Nstate_BIC <- unlist(BIC_Values)
+Nstate_logLik <-unlist(Log_Likelihood_values)
 
-BIC(model)
+min_value <- min(Nstate_BIC, Nstate_logLik)
+max_value <- max(Nstate_BIC, Nstate_logLik)
+
+plot( 3:16, Nstate_BIC, 
+      xlab = "Number of States", ylab = "BIC/Log likelihood Values",
+      main = "BIC/log likelihood Values vs. Number of States", ty="b", ylim = c(min_value, max_value)
+      , col='blue')
+
+lines(3:16, Nstate_logLik, ty="b", col='red')
+
+legend(x="topright" , legend = c("BIC Values", "Log-likelihood Values"), cex = 1.0, fill = c('blue', 'red'))
 
 
