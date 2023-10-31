@@ -39,15 +39,17 @@ time_window <- select(time_window, -c(Global_reactive_power, Voltage,Global_inte
 
 library(depmixS4)
 
+# ntimes:The vector of independent time series lengths.
 
+#we are only going to use 37 weeks to train. This will be 70% for training + 30 for testing. - this is only for the term project
 
-
-#------------------------------------------
 BIC_Values <- list()
 Log_Likelihood_values <- list()
 
-BIC_Values[1] <- 0 
-BIC_Values[2] <- 0
+# BIC_Values[1] <- 0 
+# BIC_Values[2] <- 0
+# Log_Likelihood_values[1] <-0
+# Log_Likelihood_values[2] <-0
 for(i in 3:16){
   model <- depmix(response = Global_active_power ~1, data =time_window, 
                   nstates =i, ntimes = c(120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
@@ -59,40 +61,21 @@ for(i in 3:16){
   
   fm <- fit(model)
   BIC_Values[i] <- BIC(fm) 
-  
+  Log_Likelihood_values[i] <- logLik(fm)
 }
 Nstate_BIC <- unlist(BIC_Values)
-plot( 3:16, Nstate_BIC, type = 'l', 
-      xlab = "Number of States", ylab = "BIC Value",
-      main = "BIC Value vs. Number of States")
+Nstate_logLik <-unlist(Log_Likelihood_values)
 
+min_value <- min(Nstate_BIC, Nstate_logLik)
+max_value <- max(Nstate_BIC, Nstate_logLik)
 
-#------------------------------------------
+plot( 3:16, Nstate_BIC, 
+      xlab = "Number of States", ylab = "BIC/Log likelihood Values",
+      main = "BIC/log likelihood Values vs. Number of States", ty="b", ylim = c(min_value, max_value)
+      , col='blue')
 
-# ntimes:The vector of independent time series lengths.
+lines(3:16, Nstate_logLik, ty="b", col='red')
 
-#we are only going to use 37 weeks to train. This will be 70% for training + 30 for testing.
-
-model <- depmix(response = Global_active_power ~1, data =time_window, nstates =3, ntimes = c(120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
-                                                                                             120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
-                                                                                             120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
-                                                                                             120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
-                                                                                             120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 
-                                                                                             120, 120))
-
-# model <- depmix(response = Global_active_power ~1, data =time_window, nstates =3, ntimes = nrow(time_window))
-fitModel <- fit(model)
-summary(fitModel)
-
-BIC(fitModel)
-
-
-plot(BIC(fitModel),ty="b")
-
-fitModel
-logLik(fitModel)
-BIC(fitModel)
-
-#-----------------------------------------------------------
+legend(x="topright" , legend = c("BIC Values", "Log-likelihood Values"), cex = 1.0, fill = c('blue', 'red'))
 
 
