@@ -1,2 +1,2 @@
 # 318-Group-12
-Assignments for 365 assignments
+Assignments for CMPT 318 assignments
